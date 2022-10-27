@@ -1,8 +1,8 @@
 // =================================================================
 //
 // File: bst.h
-// Author:
-// Date:
+// Author: José Diego Llaca Castro
+// Date: 26/10/2022
 //
 // =================================================================
 #ifndef BST_H
@@ -261,53 +261,96 @@ void Node<T>::preOrder(std::stringstream &aux) const {
 
 // =================================================================
 // Returns how many leaves are below the current node. Remember that
-// a node without children is a leaf.
+// a node without children is a leaf. It's complexity is O(n) since 
+// there is a recursive call.
 //
 // @return the number of leaves below the current node.
 // =================================================================
 template <class T>
 uint Node<T>::leaves() const {
-	//TO DO
-	return 0;
+	int count = 0;
+	if (left != NULL || right != NULL) {
+		if (left != NULL) {
+			count = count + left->leaves();
+		}
+		if (right != NULL) {
+			count = count + right->leaves();
+		}
+	}
+	
+	else {
+		count++;
+	}
+	
+	return count;
 }
 
 // =================================================================
 // Returns the depth of the node. Remember that the depth of a node
 // is defined as the greater depth of both children plus 1. If it is
-//	a leaf, it returns 1.
+// a leaf, it returns 1. The complexity is O(n) since there is a 
+// recursive call.
 //
 // @return the depth of the node.
 // =================================================================
 template <class T>
 uint Node<T>::depth() const {
-	//TO DO
-	return 0;
+	int count = 0;
+	if (left != NULL) {
+		count++;
+		count = count + left->depth();
+	}
+	count++;
+	return count;
 }
 
 // =================================================================
 // Returns if a node is full. A node is said to be complete if:
 // a) it is a leaf, b) they have both children, both children are
-// full and both children have the same depth.
+// full and both children have the same depth. The complexity is 
+// O(n) since it only contains recursive functions.
 //
 // @return true if the node is complete, false otherwise.
 // =================================================================
 template <class T>
 bool Node<T>::isFull() const {
-	//TO DO
+	if (left == NULL && right == NULL) {
+		return true;
+	}
+
+	else {
+		if (left->depth() == right->depth()) {
+			return left->isFull() && right->isFull();
+		}
+	}
 	return false;
 }
 
 // =================================================================
-// Returns the ancestors (parent) of the value * val *.
+// Returns the ancestors (parent) of the value * val *. It's 
+// complexity is O(n) since it on.ly contains recursive functions
 //
 // @return the ancestor (father) of * val *.
 // @throw NoSuchElement if the * val * element is not inside the
-//				tree.
+// tree.
 // =================================================================
 template <class T>
 T Node<T>::ancestor(T val) const {
-	//TO DO
-	return T();
+	if (!find(val)) {
+		throw NoSuchElement();
+	}
+
+	if (left->value == val || right->value == val) {
+		return value;
+	}
+
+	if (val == value) {
+		return true;
+	} else if (val < value) {
+		return left->ancestor(val);
+	} else {
+		return right->ancestor(val);
+	}
 }
 
 // =================================================================
@@ -337,6 +380,9 @@ public:
 	uint leaves() const;
 	bool isFull() const;
 	T ancestor(T) const;
+
+	void levelValues(Node<T> *, int, std::stringstream &) const;
+	T levels() const;
 };
 
 template <class T>
@@ -480,7 +526,8 @@ std::string BST<T>::postOrder() const {
 }
 
 // =================================================================
-// Returns the level traversal of the tree.
+// Returns the level traversal of the tree. It's complexity is 
+// O(n^2) since it has a for loop and then calls a function that has recursivity.
 //
 // @return a string with the level traversal of the tree.
 // =================================================================
@@ -490,10 +537,14 @@ std::string BST<T>::byLevel() const {
 
 	aux << "[";
 	if (!empty()) {
-		// TO DO
+		T height{levels()};
+		for (size_t i{}; i < height; ++i) {
+			levelValues(root, i, aux);
+		}
 	}
 	aux << "]";
 	return aux.str();
+	//checar
 }
 
 // =================================================================
@@ -542,5 +593,47 @@ T BST<T>::ancestor(T val) const {
 	}
 
 	return root->ancestor(val);
+}
+
+// =================================================================
+// Saves all the values stored in the Nodes of the selected level 
+// in aux. It has a complexity of O(n) since it contains recursive 
+// functions.
+//
+// @param root, the node from where the function starts.
+// @param levelnum, the amount of levels in the BST.
+// @param aux, the reference where all values are being saved.
+// =================================================================
+template <class T>
+void BST<T>::levelValues(Node<T> *root, int levelnum, std::stringstream &aux) const {
+	if (root == nullptr) {
+		return;
+	}
+
+	else if (levelnum == 0) {
+		aux << root->value << " ";
+	}
+
+	else {
+		levelValues(root->left, levelnum - 1, aux);
+		levelValues(root->right, levelnum - 1, aux);
+	}
+}
+
+// =================================================================
+// Returns the number of levels in the BST. I t has a complexity of 
+// O(1) since it only calls another function.
+//
+// @return 0 if the BST is empty or the amount of levels of BST.
+// =================================================================
+template <class T>
+T BST<T>::levels() const {
+	if (empty()) {
+		return 0;
+	}
+
+	else {
+		return root->depth();
+	}
 }
 #endif /* BST_H */
